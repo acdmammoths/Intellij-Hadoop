@@ -38,8 +38,6 @@ so use `WordCount`as project name. If required, fill in the `GroupId` (e.g.,
 with your name) and `ArtifactId` (e.g., with the name of your project, i.e,
 `WordCount` in our case), then hit `Finish`.
 
-![ids](images/ids.png)
-
 ![name_loc](images/name_loc.png)
 
 ### Configure dependencies
