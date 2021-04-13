@@ -236,55 +236,67 @@ You can build a single jar file with your program and all necessary dependencies
 (e.g., Hadoop libraries) so you can transfer the jar file to another machine to
 run it.
 
-Add the following block to **pom.xml**. The `build` block should be at the same
-level of `repositories` block and `dependencies` block.
+Add the following `build` block to `pom.xml`, at the same level of
+the `repositories` block and the `dependencies` block.
 ```xml
 <build>
     <plugins>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
             <configuration>
-                <source>8</source>
-                <target>8</target>
+                <source>14</source>
+                <target>14</target>
             </configuration>
         </plugin>
         <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.2.4</version>
             <executions>
                 <execution>
                     <phase>package</phase>
                     <goals>
-                        <goal>single</goal>
+                        <goal>shade</goal>
                     </goals>
+                    <configuration>
+                        <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <excludes>
+                                    <exclude>META-INF/*.SF</exclude>
+                                    <exclude>META-INF/*.DSA</exclude>
+                                    <exclude>META-INF/*.RSA</exclude>
+                                </excludes>
+                            </filter>
+                        </filters>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <!-- Path to your main class, include package path if needed -->
+                                <mainClass>WordCount</mainClass>
+                            </transformer>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        </transformers>
+                    </configuration>
                 </execution>
             </executions>
-            <configuration>
-                <archive>
-                    <manifest>
-                        <!-- Path to your main class, include package path if needed -->
-                        <mainClass>WordCount</mainClass>
-                    </manifest>
-                </archive>
-                <descriptorRefs>
-                    <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
-            </configuration>
         </plugin>
     </plugins>
 </build>
 ```
 
-Then in a terminal, `cd` to the directory containing the **pom.xml** file, and
+Then in a terminal, `cd` to the directory containing the `pom.xml` file, and
 run the following command:
 ```bash
 mvn package
 ```
-This command will build **WordCount-1.0-SNAPSHOT-jar-with-dependencies.jar**
-and save it in the **target** folder. To run your program, execute the following
+This command will build `WordCount-1.0-SNAPSHOT-jar-with-dependencies.jar`
+and save it in the `target` directory. To run your program, execute the following
 command:
 ```bash
 java -jar target/WordCount-1.0-SNAPSHOT-jar-with-dependencies.jar input output
 ```
+
 ## Sample Project
 See [WordCount](WordCount/).
