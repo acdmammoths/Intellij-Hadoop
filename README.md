@@ -21,29 +21,45 @@ and [Developing Hadoop Mapreduce Application within IntelliJ IDEA on Windows
 
 **Warning**: Some steps and some interface details may be slightly different in
 your version of IntelliJ, due to developments in this program. The main ideas
-presented next *should* still be valid though.
+presented in this document *should* still be valid though.
 
 ### Create a new project
 
-In IntelliJ, Go to `File`, `New`, `Project`, then select `Maven` on the left of
-the pop-up window, select your JDK, and hit `Next`.
-![new_project](images/new_project.png)
-![new_maven](images/new_maven.png)
+In IntelliJ, Go to `File`, `New`, `Project`, then select `Maven` (or `Maven
+Archetype`) on the left of the pop-up window.
 
 Set the `Project name` and `Project location`. In this tutorial, we will be
 "creating" the popular Hadoop example of the `WordCount` application from the
 original Hadoop [MapReduce
 Tutorial](https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html),
-so use `WordCount`as project name. If required, fill in the `GroupId` (e.g.,
-with your name) and `ArtifactId` (e.g., with the name of your project, i.e,
-`WordCount` in our case), then hit `Finish`.
+so use `WordCount` as project name. For the location, select a location in your
+hard drive that you are going to remember. Now, select a JDK. Hadoop only
+supports Java up to version 11 (they are working on supporting more recent
+versions), so be sure to have a JDK of that version or earlier. You can use
+IntelliJ to download a new one, if needed, by clicking on `Download JDK...` in
+the dropdown menu. Any flavor of JDK 11 would work. <!--
+, and hit `Next`.
+![new_project](images/new_project.png)
+![new_maven](images/new_maven.png)
+-->
+Select `org.apache.maven.archetypes:maven-archetype-quickstart` as the
+archetype.
 
+If required, fill in the `GroupId` (e.g.,
+with your name) and `ArtifactId` (e.g., with the name of your project, i.e,
+`WordCount` in our case), then hit `Finish` (or `Create`).
+
+<!--
 ![name_loc](images/name_loc.png)
+-->
 
 ### Configure dependencies
 A file called `pom.xml` should open automatically in the IntelliJ editor. If it
 does not, find it in the Project browser on the left, and double-click on it to
 open it.
+
+If there is any existing `<dependencies>` block please delete anything between
+that tag and `</dependencies>` (these two tags included).
 
 Paste the following 2 blocks before the last `</project>` tag.
 
@@ -59,17 +75,17 @@ Paste the following 2 blocks before the last `</project>` tag.
     <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-minicluster</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.1</version>
     </dependency>
     <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-mapreduce-client-core</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.1</version>
     </dependency>
     <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-common</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.1</version>
     </dependency>
 </dependencies>
 ```
@@ -81,7 +97,7 @@ the latest versions available in the Maven repository for
 [hadoop-common](https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common),
 and update the version numbers above accordingly.
 
-The full `pom.xml` is the following:
+The full `pom.xml` is:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 
@@ -95,8 +111,8 @@ The full `pom.xml` is the following:
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>14</maven.compiler.source>
-        <maven.compiler.target>14</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <repositories>
         <repository>
@@ -108,32 +124,39 @@ The full `pom.xml` is the following:
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-minicluster</artifactId>
-            <version>3.3.0</version>
+            <version>3.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-mapreduce-client-core</artifactId>
-            <version>3.3.0</version>
+            <version>3.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
-            <version>3.3.0</version>
+            <version>3.4.1</version>
         </dependency>
     </dependencies>
 </project>
 ```
 
+A little icon with a blue `m` and a "refresh" symbol (two arrows in a circle)
+should appear somewhere around your window. Please click it: it will make sure
+you have all the needed dependencies to run Hadoop programs, i.e., all the Java
+libraries needed.
+
 ### Create the WordCount class
 
 Select the `Project`&rarr;`src`&rarr;`main`&rarr;`java` folder on the left
 pane, then do `File`, `New`, `Java Class` and use **WordCount** as the name of
-the class.
+the class. You can delete the `App` file that was created.
+
 ![new_class](images/new_class.png)
 
-Paste the Java code into `WordCount.java` (this code is taken from the original
-Hadoop [MapReduce
+Paste the Java code below into `WordCount.java` (this code is taken from the
+original Hadoop [MapReduce
 Tutorial](https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html)).
+
 ```java
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -200,23 +223,27 @@ public class WordCount {
 ![wordcount](images/wordcount.png)
 
 ### Prepare to run
-The **WordCount** program scans all text files in the folder specified by the
-first command line argument, and output the number of lines in which each word
-appears into a folder specified by the second command line argument.
+The `WordCount` program scans all text files in the folder specified by the
+first command line argument, and outputs the total number of lines in which each
+word appears, writing these numbers into files in the folder specified by the
+second command line argument.
 
-Create a folder named **input** under the project's root folder (so, at the same
-level as the **src**folder), and drag/copy some text files inside this folder.
+Create a folder named `input` under the project's root folder (so, at the same
+level as the `src` folder), and drag/copy some text files from your computer
+inside this folder (or, e.g., look for plaintext files on the web, e.g., of
+Shakespeare's plays).
+
 ![sample_text](images/sample_text.png)
 
 Then set the two command line arguments. Select `Run`&rarr;`Edit Configurations`.
 ![edit_config](images/edit_config.png)
 
-Add a new `Application` configuration, set the `Name` to **WordCount**, set the
-`Main class` to **WordCount**, set `Program arguments` to **input output**. This
-way, the program will read the input from the **input** folder, and save the
-results to the **output** folder. Do *not* create the output folder, as Hadoop
+Add a new `Application` configuration, set the `Name` to `WordCount`, set the
+`Main` class to `WordCount`, and set `Program arguments` to `input output`. This
+way, the program will read the input from the `input` folder, and save the
+results to the `output` folder. Do *not* create the `output` folder, as Hadoop
 will create the folder automatically. If the folder exists, Hadoop will raise
-exceptions (thus, you have to manually delete the output folder before every
+exceptions (thus, you have to manually delete the `output` folder before every
 time you run the program).
 ![new_app](images/new_app.png)
 ![config](images/config.png)
@@ -224,10 +251,10 @@ time you run the program).
 
 ### Run
 Select `Run`&rarr;`Run 'WordCount'` to run the Hadoop program. If you re-run the
-program, delete the **output** folder before each run.
+program, remember to delete the `output` folder before each run.
 ![run_app](images/run_app.png)
 
-Results are saved in the file **output/part-r-00000**.
+Results are saved in the file `output/part-r-00000`.
 ![result](images/result.png)
 
 
@@ -244,16 +271,16 @@ the `repositories` block and the `dependencies` block.
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.1</version>
+            <version>3.14.0</version>
             <configuration>
-                <source>14</source>
-                <target>14</target>
+                <source>11</source>
+                <target>11</target>
             </configuration>
         </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.2.4</version>
+            <version>3.6.0</version>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -288,11 +315,17 @@ the `repositories` block and the `dependencies` block.
 
 Then in a terminal, `cd` to the directory containing the `pom.xml` file, and
 run the following command:
+
 ```bash
 mvn package
+
 ```
+
 This command will build `WordCount-1.0-SNAPSHOT-jar-with-dependencies.jar`
-and save it in the `target` directory. To run your program, execute the following
+and save it in the `target` directory. If it fails, remove the `AppTest` file
+from the `src/test/java/` folder, and try again.
+
+To run your Hadoop program, execute the following
 command:
 ```bash
 java -jar target/WordCount-1.0-SNAPSHOT-jar-with-dependencies.jar input output
